@@ -155,6 +155,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MarkovModels.cpp" />
+    <ClCompile Include="MarokovChain.cpp" />
+    <ClCompile Include="Matrix.cpp" />
+    <ClCompile Include="SequenceData.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MarokovChain.h" />
+    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="SequenceData.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TrainingData\NORF.txt" />
+    <Content Include="TrainingData\ORF.txt" />
+    <Content Include="TrainingData\Test.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
