@@ -126,13 +126,30 @@ void MarokovChain::CreateMatrix()
     }
     for(int j = 1; j < length; j++)
     {
+        bool restart = true;
+        double totalAmount = 0;
         for(int i = 1; i < length; i++)
         {
             std::string key = std::to_string(j) + mapDelimiter + std::to_string(i);
-            _transitionMatrix.matrix[j][i] = std::to_string(_codonToCodonAmounts[key]);
+            if(restart)
+            {
+                _transitionMatrix.matrix[j][i] = std::to_string(_codonToCodonAmounts[key]);
+                totalAmount +=_codonToCodonAmounts[key];
+                if(i + 1 >= length && restart)
+                {
+                    i = 0;
+                    restart = false;
+                }
+            }
+            else
+            {
+                double num = std::stoi(_transitionMatrix.matrix[j][i]);
+                _transitionMatrix.matrix[j][i] = std::to_string(num / totalAmount);
+            }
+            
         }
     }
-    _transitionMatrix.DisplayMatrix();
+    _transitionMatrix.PrintToOutputFile("TrainingData/OutputFile.txt");
 }
 
 void MarokovChain::ChooseListToAddToo(bool val, const std::string codon)

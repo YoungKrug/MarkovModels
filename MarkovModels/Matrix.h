@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <fstream>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -27,6 +28,26 @@ namespace Matrix
               }
               std::cout << std::endl;
           }
+            
+        }
+        void PrintToOutputFile(std::string path)
+        {
+            std::ofstream output;
+            output.open(path);
+            if(!output.is_open())
+            {
+                std::cout << "Invalid output file, please enter a new one";
+                std::cin >> path;
+                output.open(path);
+            }
+            for(int j = 0; j < matrix.size(); j++)
+            {
+                for(int i = 0; i < matrix[0].size(); i++)
+                {
+                    output << matrix[i][j] << "\t";
+                }
+                output << std::endl;
+            }
             
         }
     };

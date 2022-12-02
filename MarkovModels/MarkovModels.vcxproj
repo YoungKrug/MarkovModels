@@ -167,6 +167,7 @@
   <ItemGroup>
     <Content Include="TrainingData\NORF.txt" />
     <Content Include="TrainingData\ORF.txt" />
+    <Content Include="TrainingData\OutputFile.txt" />
     <Content Include="TrainingData\Test.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
