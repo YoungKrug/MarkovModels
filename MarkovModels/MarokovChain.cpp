@@ -66,26 +66,30 @@ void MarokovChain::ConstructMarkovChain()
 {
     for(auto sequence: _sequenceInformation)
     {
-        //Find the window of exons
-        //WE can use Regex to find windows
         std::string seq = sequence.second.Sequence;
-        std::regex startCodons("ATG");
-        std::smatch match_results;
-        if(std::regex_search(seq,match_results, startCodons))
+        std::string previousCodon = "";
+        //std::cout <<match_results.size();
+        for(int i = 0; i < static_cast<int>(seq.size()); i+=3)
         {
-            //std::cout <<match_results.size();
-            for(int i = static_cast<int>(match_results.position()); i < static_cast<int>(seq.size()); i+=3)
+            std::string codon = seq.substr(i, 3);
+            if(codon.size() < 3)
+                continue;
+            ChooseListToAddToo(sequence.second.isORF, codon);
+            if(previousCodon == "")
             {
-               
-                std::string codon = seq.substr(i, 3);
-                if(codon.size() < 3)
-                    continue;
-                ChooseListToAddToo(sequence.second.isORF, codon);
-                if(codon._Equal("TGA") ||
-              codon._Equal("TAA") ||
-              codon._Equal("TAG"))
-                    break; // Break the window, no more reading
+                previousCodon = codon;
+                continue;
             }
+            std::string codonToCodonKey;
+            codonToCodonKey.append(std::to_string(_codonToNumber[previousCodon]));
+            codonToCodonKey.append(mapDelimiter).append(std::to_string(_codonToNumber[codon]));
+            if(_codonToCodonAmounts.find(codonToCodonKey) == _codonToCodonAmounts.end())
+            {
+                _codonToCodonAmounts.insert({codonToCodonKey, 1});
+            }
+            else
+                _codonToCodonAmounts[codonToCodonKey]++;
+            previousCodon = codon;
         }
     }
     CreateMatrix();
@@ -109,25 +113,26 @@ void MarokovChain::CreateMatrix()
 {
     double probOfCodonInORF = 0.0;
     double probOfCodonInNORF = 0.0;
-    for (auto codons: _codonAmountsORF)
+    int length = static_cast<int>(_codonToNumber.size());
+    Matrix::Matrix<std::string> initMatrix(length + 1, length + 1);
+    _transitionMatrix = initMatrix;
+    for(int j = 1; j < length; j++)
     {
-        probOfCodonInORF += codons.second;
+        _transitionMatrix.matrix[j][0] = _numberToCodon[j - 1];
     }
-    for (auto codons: _codonAmountsNORF)
+    for(int i = 1; i < length; i++)
     {
-        probOfCodonInNORF += codons.second;
+        _transitionMatrix.matrix[0][i] = _numberToCodon[i - 1];
     }
-    std::cout << "Probability in ORF\n";
-    for (auto codons: _codonAmountsORF)
+    for(int j = 1; j < length; j++)
     {
-        std::cout << codons.first << " Has a probability of: " << static_cast<double>(codons.second) / probOfCodonInORF << " Amount: " << codons.second << std::endl;
+        for(int i = 1; i < length; i++)
+        {
+            std::string key = std::to_string(j) + mapDelimiter + std::to_string(i);
+            _transitionMatrix.matrix[j][i] = std::to_string(_codonToCodonAmounts[key]);
+        }
     }
-    std::cout << "\n\nProbability in NORF\n";
-    for (auto codons: _codonAmountsNORF)
-    {
-        std::cout << codons.first << " Has a probability of: " << static_cast<double>(codons.second) / probOfCodonInNORF << " Amount: " << codons.second << std::endl;
-    }
-    
+    _transitionMatrix.DisplayMatrix();
 }
 
 void MarokovChain::ChooseListToAddToo(bool val, const std::string codon)
@@ -149,5 +154,11 @@ void MarokovChain::ChooseListToAddToo(bool val, const std::string codon)
         }
         else
             _codonAmountsNORF[codon]++;
+    }
+    if(_codonToNumber.find(codon) == _codonToNumber.end())
+    {
+        _codonToNumber.insert({codon, _numberOfCodons});
+        _numberToCodon.insert({_numberOfCodons, codon});
+        _numberOfCodons++;
     }
 }
