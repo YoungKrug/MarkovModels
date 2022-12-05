@@ -1,5 +1,6 @@
 ﻿#include "MarokovChain.h"
 
+#include <map>
 #include <regex>
 
 #include "fstream"
@@ -68,10 +69,17 @@ void MarokovChain::ConstructMarkovChain()
     {
         std::string seq = sequence.second.Sequence;
         std::string previousCodon = "";
+        if(sequence.second.sequenceType == SequenceData::CounterClockWise)
+            seq = ReverseTranscription(seq);
         //std::cout <<match_results.size();
-        for(int i = 0; i < static_cast<int>(seq.size()); i+=3)
+        int length = static_cast<int>(seq.size()) / 3;
+        for(int i = 0; i < length; i++)
         {
-            std::string codon = seq.substr(i, 3);
+            if(seq[i*3 + 3] == '\0')
+            {
+                continue;
+            }
+            std::string codon = seq.substr(i * 3, 3);
             if(codon.size() < 3)
                 continue;
             ChooseListToAddToo(sequence.second.isORF, codon);
@@ -149,7 +157,27 @@ void MarokovChain::CreateMatrix()
             
         }
     }
+    
     _transitionMatrix.PrintToOutputFile("TrainingData/OutputFile.txt");
+}
+
+std::string MarokovChain::ReverseTranscription(std::string str)
+{
+    std::string newString ="";
+    std::unordered_map<char, char> complements;
+    complements.insert({'G', 'C'});
+    complements.insert({'C', 'G'});
+    complements.insert({'A', 'T'});
+    complements.insert({'T', 'A'});
+    for(int i = static_cast<int>(str.size()); i > 0; i--)
+    {
+        if(str[i] == '\0')
+            continue;
+        char val = complements[str[i]];
+        newString += val;
+        
+    }
+    return newString;
 }
 
 void MarokovChain::ChooseListToAddToo(bool val, const std::string codon)

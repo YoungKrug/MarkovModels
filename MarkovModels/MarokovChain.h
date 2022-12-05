@@ -15,6 +15,7 @@ public:
     void ChooseListToAddToo(bool, std::string);
     void DisplayData() const;
     void CreateMatrix();
+    std::string ReverseTranscription(std::string);
     MarokovChain(){}
 private:
      enum States
