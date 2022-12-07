@@ -158,13 +158,18 @@
     <ClCompile Include="MarokovChain.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="SequenceData.cpp" />
+    <ClCompile Include="TransitionCalculations.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MarokovChain.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="SequenceData.h" />
+    <ClInclude Include="TransitionCalculations.h" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Logodds.txt" />
+    <Content Include="OutputFile.txt" />
+    <Content Include="Outputfile2.txt" />
     <Content Include="TrainingData\NORF.txt" />
     <Content Include="TrainingData\ORF.txt" />
     <Content Include="TrainingData\OutputFile.txt" />

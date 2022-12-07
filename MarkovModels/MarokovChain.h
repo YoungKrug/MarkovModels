@@ -4,6 +4,7 @@
 
 #include "Matrix.h"
 #include "SequenceData.h"
+#include "TransitionCalculations.h"
 
 //How often it goes from one codon to another codon
 //Create a bias table..
@@ -15,7 +16,9 @@ public:
     void ChooseListToAddToo(bool, std::string);
     void DisplayData() const;
     void CreateMatrix();
+    void GenerateScores(const TransitionCalculations);
     std::string ReverseTranscription(std::string);
+    Matrix::Matrix<std::string>GetTransitionTable();
     MarokovChain(){}
 private:
      enum States
@@ -31,6 +34,7 @@ private:
     std::unordered_map<std::string, int> _codonToNumber;
     std::unordered_map<int, std::string> _numberToCodon;
     std::unordered_map<std::string,int> _codonToCodonAmounts;
+    std::vector<std::pair<std::string, double>> _sequenceScores;
     int _numberOfCodons = 0;
     std::string mapDelimiter = "->";
 };

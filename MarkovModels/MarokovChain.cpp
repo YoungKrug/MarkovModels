@@ -89,6 +89,11 @@ void MarokovChain::ConstructMarkovChain()
                 continue;
             }
             std::string codonToCodonKey;
+            if(previousCodon == "GCG")
+            if(codon == "TAG")
+            {
+                std::cout << "Stop";
+            }
             codonToCodonKey.append(std::to_string(_codonToNumber[previousCodon]));
             codonToCodonKey.append(mapDelimiter).append(std::to_string(_codonToNumber[codon]));
             if(_codonToCodonAmounts.find(codonToCodonKey) == _codonToCodonAmounts.end())
@@ -101,19 +106,23 @@ void MarokovChain::ConstructMarkovChain()
         }
     }
     CreateMatrix();
-   // DisplayData();
 }
 void MarokovChain::DisplayData() const
 {
-    std::cout << "ORF Table" << std::endl;
-    for(auto seqInfo : _codonAmountsORF)
+    std::string path;
+    std::cout << "Please enter a output file for your distribution table.\n";
+    std::cin >> path;
+    std::ofstream output;
+    output.open(path);
+    if(!output.is_open())
     {
-        std::cout << seqInfo.first  << " : " << seqInfo.second << std::endl;
+        std::cout << "Invalid output file, please enter a new one";
+        std::cin >> path;
+        output.open(path);
     }
-    std::cout << "\nNORF Table" << std::endl;
-    for(auto seqInfo : _codonAmountsNORF)
+    for(auto val : _sequenceScores)
     {
-        std::cout << seqInfo.first  << " : " << seqInfo.second << std::endl;
+        output << val.first << "," << val.second << std::endl;
     }
 }
 
@@ -124,26 +133,27 @@ void MarokovChain::CreateMatrix()
     int length = static_cast<int>(_codonToNumber.size());
     Matrix::Matrix<std::string> initMatrix(length + 1, length + 1);
     _transitionMatrix = initMatrix;
-    for(int j = 1; j < length; j++)
+    for(int j = 1; j < length + 1; j++)
     {
         _transitionMatrix.matrix[j][0] = _numberToCodon[j - 1];
     }
-    for(int i = 1; i < length; i++)
+    for(int i = 1; i < length + 1; i++)
     {
         _transitionMatrix.matrix[0][i] = _numberToCodon[i - 1];
     }
-    for(int j = 1; j < length; j++)
+    for(int j = 1; j < length + 1; j++)
     {
         bool restart = true;
         double totalAmount = 0;
-        for(int i = 1; i < length; i++)
+        for(int i = 1; i < length + 1; i++)
         {
-            std::string key = std::to_string(j) + mapDelimiter + std::to_string(i);
+            std::string key = std::to_string(j - 1) + mapDelimiter + std::to_string(i - 1);
             if(restart)
             {
-                _transitionMatrix.matrix[j][i] = std::to_string(_codonToCodonAmounts[key]);
+                int val = _codonToCodonAmounts[key];
+                _transitionMatrix.matrix[j][i] = std::to_string(val);
                 totalAmount +=_codonToCodonAmounts[key];
-                if(i + 1 >= length && restart)
+                if(i >= length && restart)
                 {
                     i = 0;
                     restart = false;
@@ -157,8 +167,41 @@ void MarokovChain::CreateMatrix()
             
         }
     }
-    
-    _transitionMatrix.PrintToOutputFile("TrainingData/OutputFile.txt");
+}
+
+void MarokovChain::GenerateScores(const TransitionCalculations scoreMatrix)
+{
+    for(auto seq : _sequenceInformation)
+    {
+        std::string sequence = seq.second.Sequence;
+        std::string previousCodon = "";
+        double score = 0.0;
+        int length = static_cast<int>(sequence.size()) / 3;
+        
+        for(int i = 0; i < length; i++)
+        {
+            if(sequence[i*3 + 3] == '\0')
+            {
+                continue;
+            }
+            std::string codon = sequence.substr(i * 3, 3);
+            if(previousCodon == "")
+            {
+                previousCodon = codon;
+                continue;
+            }
+            std::string codonToCodonKey;
+            codonToCodonKey = (previousCodon) + (mapDelimiter) + (codon);
+            double probability;
+            probability = scoreMatrix._transverseValues.at(codonToCodonKey);
+            score += probability;
+            previousCodon = codon;
+        }
+        double doubLength = static_cast<double>(length);
+        double finalScore = score / doubLength;
+        _sequenceScores.emplace_back(std::pair<std::string, double>(seq.second.name, finalScore));
+    }
+    DisplayData();
 }
 
 std::string MarokovChain::ReverseTranscription(std::string str)
@@ -178,6 +221,11 @@ std::string MarokovChain::ReverseTranscription(std::string str)
         
     }
     return newString;
+}
+
+Matrix::Matrix<std::string> MarokovChain::GetTransitionTable()
+{
+    return _transitionMatrix;
 }
 
 void MarokovChain::ChooseListToAddToo(bool val, const std::string codon)
