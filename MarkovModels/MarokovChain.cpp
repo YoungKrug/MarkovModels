@@ -89,11 +89,6 @@ void MarokovChain::ConstructMarkovChain()
                 continue;
             }
             std::string codonToCodonKey;
-            if(previousCodon == "GCG")
-            if(codon == "TAG")
-            {
-                std::cout << "Stop";
-            }
             codonToCodonKey.append(std::to_string(_codonToNumber[previousCodon]));
             codonToCodonKey.append(mapDelimiter).append(std::to_string(_codonToNumber[codon]));
             if(_codonToCodonAmounts.find(codonToCodonKey) == _codonToCodonAmounts.end())
@@ -122,7 +117,9 @@ void MarokovChain::DisplayData() const
     }
     for(auto val : _sequenceScores)
     {
-        output << val.first << "," << val.second << std::endl;
+        std::string seq = val.first;
+        seq.erase(std::remove(seq.begin(), seq.end(), '\n'), seq.cend());
+        output << seq<< "," << val.second << std::endl;
     }
 }
 
