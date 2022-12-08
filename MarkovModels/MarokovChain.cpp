@@ -102,10 +102,10 @@ void MarokovChain::ConstructMarkovChain()
     }
     CreateMatrix();
 }
-void MarokovChain::DisplayData() const
+void MarokovChain::DisplayData(bool discriminate)
 {
     std::string path;
-    std::cout << "Please enter a output file for your distribution table.\n";
+    std::cout << "Please enter a output file for your "+ _name + " distribution table.\n";
     std::cin >> path;
     std::ofstream output;
     output.open(path);
@@ -115,11 +115,19 @@ void MarokovChain::DisplayData() const
         std::cin >> path;
         output.open(path);
     }
-    for(auto val : _sequenceScores)
+      for(auto val : _sequenceScores)
     {
         std::string seq = val.first;
-        seq.erase(std::remove(seq.begin(), seq.end(), '\n'), seq.cend());
-        output << seq<< "," << val.second << std::endl;
+        double num = val.second;
+        seq.erase(std::remove(seq.begin(), seq.end(), '>'), seq.cend());
+        //seq.append(","+std::to_string(num));
+        if(discriminate)
+        {
+            std::string determinationString = num > _predictiveValue ? "Predicted ORF:  " : "Predicted NORF:  ";
+            output << determinationString << num <<"," << seq <<std::endl;
+        }
+        else
+            output << num <<"," << seq <<std::endl;
     }
 }
 
@@ -198,7 +206,6 @@ void MarokovChain::GenerateScores(const TransitionCalculations scoreMatrix)
         double finalScore = score / doubLength;
         _sequenceScores.emplace_back(std::pair<std::string, double>(seq.second.name, finalScore));
     }
-    DisplayData();
 }
 
 std::string MarokovChain::ReverseTranscription(std::string str)

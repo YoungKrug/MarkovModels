@@ -14,18 +14,21 @@ public:
     void ReadFiles(std::vector<std::string>);
     void ConstructMarkovChain();
     void ChooseListToAddToo(bool, std::string);
-    void DisplayData() const;
+    void DisplayData(bool);
     void CreateMatrix();
     void GenerateScores(const TransitionCalculations);
     std::string ReverseTranscription(std::string);
     Matrix::Matrix<std::string>GetTransitionTable();
-    MarokovChain(){}
+    MarokovChain(std::string name)
+    {
+        _name = name;
+    }
 private:
-     enum States
-     {
-         ORF,
-         NORF
-     };
+    enum States
+    {
+        ORF,
+        NORF
+    };
     States _state;
     std::unordered_map<std::string, SequenceData> _sequenceInformation;
     Matrix::Matrix<std::string> _transitionMatrix;
@@ -35,6 +38,8 @@ private:
     std::unordered_map<int, std::string> _numberToCodon;
     std::unordered_map<std::string,int> _codonToCodonAmounts;
     std::vector<std::pair<std::string, double>> _sequenceScores;
+    std::string _name;
     int _numberOfCodons = 0;
     std::string mapDelimiter = "->";
+    double _predictiveValue = 0.3;
 };
